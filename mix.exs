@@ -25,7 +25,7 @@ defmodule ObanUi.MixProject do
       {:phoenix, ">= 1.5.8"},
       {:phoenix_html, ">= 3.1.0"},
       {:gettext, "~> 0.11"},
-      {:phoenix_ecto, ">= 3.0"}
+      {:phoenix_ecto, "~> 4.4.0"}
     ]
   end
 end
