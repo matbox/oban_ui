@@ -1,4 +1,4 @@
-defmodule ObanUi.Job do
+defmodule ObanUi.Contexts.Jobs.Job do
   use Ecto.Schema
   import Ecto.Changeset
 
