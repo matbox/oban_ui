@@ -1,3 +1,11 @@
+defmodule StatsWeb.LayoutView do
+  use StatsWeb, :view
+
+  # Phoenix LiveDashboard is available only in development by default,
+  # so we instruct Elixir to not warn if the dashboard route is missing.
+  @compile {:no_warn_undefined, {Routes, :live_dashboard_path, 2}}
+end
+
 defmodule ObanUi.Live.Jobs.Index do
   @moduledoc """
   Jobs LiveView
@@ -9,16 +17,18 @@ defmodule ObanUi.Live.Jobs.Index do
   alias ObanUi.Contexts.Jobs
   alias ObanUi.Live.Components.Pagination
 
-  data paginated_data, :struct
-  data params, :map
-  data selected_job, :struct
+  data(paginated_data, :struct)
+  data(params, :map)
+  data(selected_job, :struct)
 
   @impl true
   def handle_params(params, _session, socket) do
-    {:noreply, assign(socket,
-    paginated_data: paginate_entries(params),
-    params: params,
-    selected_job: nil)}
+    {:noreply,
+     assign(socket,
+       paginated_data: paginate_entries(params) |> IO.inspect(),
+       params: params,
+       selected_job: nil
+     )}
   end
 
   @impl true
@@ -90,6 +100,7 @@ defmodule ObanUi.Live.Jobs.Index do
   end
 
   def selected_job_drawer(%{job: nil} = assigns), do: ~F""
+
   def selected_job_drawer(assigns) do
     ~F"""
     <div class="absolute right-0 w-1/2 h-screen z-50 bg-white border-l-4 border-accent p-5 flex flex-col flex-gap"
@@ -114,18 +125,37 @@ defmodule ObanUi.Live.Jobs.Index do
       </div>
       <div class="font-bold">Arguments:</div>
       <div class="text-xs text-gray-600">{inspect(@job.args)}</div>
+      <div class="text-xs text-gray-600">
+        <.errors errors={Map.get(@job, :errors)} />
+      </div>
     </div>
+    """
+  end
+
+  def errors(%{errors: nil} = assigns), do: ~F""
+
+  def errors(assigns) do
+    ~F"""
+    <ul>
+      {#for error <- Enum.reverse(@errors)}
+        <li>Attempt: {error["attempt"]}</li>
+        <li><code><pre>{error["error"]}</pre></code></li>
+      {/for}
+    </ul>
     """
   end
 
   @impl true
   def handle_event("filter", event, %{assigns: %{params: existing_params}} = socket) do
-    new_params = event
-    |> Map.take(["state"])
-    |> then(& Map.merge(existing_params, &1))
-    {:noreply, socket
-      |> assign(:params, new_params)
-      |> push_patch(to: routes().live_path(socket, __MODULE__, new_params), replace: true)}
+    new_params =
+      event
+      |> Map.take(["state"])
+      |> then(&Map.merge(existing_params, &1))
+
+    {:noreply,
+     socket
+     |> assign(:params, new_params)
+     |> push_patch(to: routes().live_path(socket, __MODULE__, new_params), replace: true)}
   end
 
   @impl true
@@ -145,14 +175,16 @@ defmodule ObanUi.Live.Jobs.Index do
       |> Map.put_new(:order_by_direction, "asc")
 
     # If no state is being filtered, remove completed by default
-    params = if Map.get(params, "state", nil) do
-      params
-    else
-      Map.put(params, "state", :all_but_completed)
-    end
+    params =
+      if Map.get(params, "state", nil) do
+        params
+      else
+        Map.put(params, "state", :all_but_completed)
+      end
 
     Jobs.paginate(params, [
-      {String.to_existing_atom(params.order_by_direction), String.to_existing_atom(params.order_by_key)}
+      {String.to_existing_atom(params.order_by_direction),
+       String.to_existing_atom(params.order_by_key)}
     ])
   end
 

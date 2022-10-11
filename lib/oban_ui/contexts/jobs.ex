@@ -8,7 +8,7 @@ defmodule ObanUi.Contexts.Jobs do
   alias ObanUi.Repo
 
   def get!(id) do
-    Repo.one(from j in Job, where: j.id == ^id)
+    Repo.one(from(j in Job, where: j.id == ^id))
   end
 
   @doc """
@@ -26,7 +26,8 @@ defmodule ObanUi.Contexts.Jobs do
 
   ######### Filtering
 
-  defp maybe_filter_by_state(query, %{"state" => state}) when state in [nil, "", :all_but_completed] do
+  defp maybe_filter_by_state(query, %{"state" => state})
+       when state in [nil, "", :all_but_completed] do
     from(j in query, where: j.state != ^"completed")
   end
 
@@ -40,6 +41,5 @@ defmodule ObanUi.Contexts.Jobs do
 
   ######### Ordering
 
-  defp order(query, order_by), do:
-    from(d in query, order_by: ^order_by)
+  defp order(query, order_by), do: from(d in query, order_by: ^order_by)
 end

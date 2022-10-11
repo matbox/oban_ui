@@ -4,9 +4,9 @@ defmodule ObanUi.Live.Components.Pagination do
   """
   use Surface.LiveComponent
 
-  prop view, :module, required: true
-  prop data, :struct, required: true
-  prop page_params, :map, default: %{}
+  prop(view, :module, required: true)
+  prop(data, :struct, required: true)
+  prop(page_params, :map, default: %{})
 
   @impl true
   def render(%{data: data} = assigns) do
@@ -60,10 +60,16 @@ defmodule ObanUi.Live.Components.Pagination do
   end
 
   @impl true
-  def handle_event("paginate", %{"page" => page}, %{assigns: %{view: view, page_params: existing_params}} = socket) do
+  def handle_event(
+        "paginate",
+        %{"page" => page},
+        %{assigns: %{view: view, page_params: existing_params}} = socket
+      ) do
     new_params = Map.merge(%{page: page}, existing_params)
-    {:noreply, socket
-    |> push_patch(to: routes().live_path(socket, view, new_params), replace: true)}
+
+    {:noreply,
+     socket
+     |> push_patch(to: routes().live_path(socket, view, new_params), replace: true)}
   end
 
   defp routes, do: Application.get_env(:oban_ui, :routes)
