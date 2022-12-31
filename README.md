@@ -1,3 +1,11 @@
+# Update
+
+As Scrivener was added for pagination, we need to define the following in repo.ex:
+
+```
+use Scrivener, page_size: 10
+```
+
 # ObanUi
 
 Unofficial ui for oban. This repo is not a replacement for  [obanpro](https://getoban.pro/)
